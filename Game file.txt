@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Car Racing Game</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>Car Racing Game</h1>
+    <canvas id="gameCanvas"></canvas>
+    <script src="script.js"></script>
+</body>
+</html>
+body {
+    text-align: center;
+    font-family: Arial, sans-serif;
+    background-color: #333;
+    color: white;
+}
+
+canvas {
+    background: gray;
+    display: block;
+    margin: auto;
+    border: 3px solid white;
+}
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+
+canvas.width = 400;
+canvas.height = 600;
+
+let car = { x: 175, y: 500, width: 50, height: 80 };
+let obstacles = [];
+let speed = 5;
+let gameOver = false;
+
+document.addEventListener("keydown", moveCar);
+
+function moveCar(event) {
+    if (event.key === "ArrowLeft" && car.x > 0) {
+        car.x -= 20;
+    }
+    if (event.key === "ArrowRight" && car.x < canvas.width - car.width) {
+        car.x += 20;
+    }
+}
+
+function createObstacle() {
+    let x = Math.random() * (canvas.width - 50);
+    obstacles.push({ x: x, y: 0, width: 50, height: 80 });
+}
+
+function updateObstacles() {
+    for (let i = 0; i < obstacles.length; i++) {
+        obstacles[i].y += speed;
+
+        // Collision detection
+        if (
+            car.x < obstacles[i].x + obstacles[i].width &&
+            car.x + car.width > obstacles[i].x &&
+            car.y < obstacles[i].y + obstacles[i].height &&
+            car.y + car.height > obstacles[i].y
+        ) {
+            gameOver = true;
+            alert("Game Over! Refresh to Restart.");
+            document.location.reload();
+        }
+    }
+
+    obstacles = obstacles.filter(obstacle => obstacle.y < canvas.height);
+}
+
+function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Draw car
+    ctx.fillStyle = "blue";
+    ctx.fillRect(car.x, car.y, car.width, car.height);
+
+    // Draw obstacles
+    ctx.fillStyle = "red";
+    for (let obs of obstacles) {
+        ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
+    }
+
+    if (!gameOver) {
+        updateObstacles();
+        requestAnimationFrame(draw);
+    }
+}
+
+setInterval(createObstacle, 1500);
+draw();
